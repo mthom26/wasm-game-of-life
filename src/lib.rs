@@ -1,5 +1,6 @@
 extern crate cfg_if;
 extern crate wasm_bindgen;
+extern crate web_sys;
 
 mod utils;
 
@@ -15,6 +16,13 @@ cfg_if! {
         extern crate wee_alloc;
         #[global_allocator]
         static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+    }
+}
+
+// A macro to provide `println!(..)`-style syntax for `console.log` logging.
+macro_rules! log {
+    ( $( $t:tt )* ) => {
+        web_sys::console::log_1(&format!( $( $t )* ).into());
     }
 }
 
@@ -72,8 +80,12 @@ impl Universe {
 #[wasm_bindgen]
 impl Universe {
     pub fn new() -> Universe {
+        utils::set_panic_hook();
+
         let width = 64;
         let height = 64;
+        // Visible message in browser when universe is created
+        log!("Setting universe with {}x{} cells.", width, height);
 
         let cells = (0..width * height)
             .map(|i| {
