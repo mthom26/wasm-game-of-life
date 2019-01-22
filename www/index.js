@@ -13,20 +13,52 @@ const DEAD_COLOR = '#f2f2f2';
 const canvas = document.getElementById("game-of-life-canvas");
 canvas.height = (CELL_SIZE + 1) * height + 1;
 canvas.width = (CELL_SIZE + 1) * width + 1;
-
 const ctx = canvas.getContext('2d');
 
+const playPauseButton = document.getElementById("play-pause-button");
+const oneTickButton = document.getElementById("render-one-tick-button");
+
+playPauseButton.addEventListener('click', (event) => {
+  isPaused() ? play() : pause();
+});
+
+oneTickButton.addEventListener('click', (event) => {
+  renderOneTick();
+});
+
+let animationId = null;
+// Render 
 const renderLoop = () => {
   // debugger;
   universe.tick();
-
   drawGrid();
   drawCells();
-
-  requestAnimationFrame(renderLoop);
+  animationId = requestAnimationFrame(renderLoop);
 };
 
-requestAnimationFrame(renderLoop);
+const renderOneTick = () => {
+  universe.tick();
+  drawGrid();
+  drawCells();
+};
+
+// Playback controls
+const isPaused = () => {
+  return animationId === null;
+};
+
+const play = () => {
+  console.log('playing');
+  playPauseButton.textContent = 'pause';
+  renderLoop();
+};
+
+const pause = () => {
+  console.log('paused')
+  playPauseButton.textContent = 'play';
+  cancelAnimationFrame(animationId);
+  animationId = null;
+};
 
 // Draw Grid
 const drawGrid = () => {
@@ -75,4 +107,10 @@ const drawCells = () => {
   }
 
   ctx.stroke();
-}
+};
+
+// Initial Render and setup draws the initial universe and leaves the game in
+// a paused state
+playPauseButton.textContent = 'play';
+drawGrid();
+drawCells();
